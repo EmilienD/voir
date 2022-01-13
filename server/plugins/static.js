@@ -3,6 +3,6 @@ const path = require('path')
 
 module.exports = fp(async function (fastify, opts) {
   fastify.register(require('fastify-static'), {
-    root: path.join(__dirname, '../../video-stream-to-disk-client/build'),
+    root: path.join(__dirname, '../../web-client/build'),
   })
 })
