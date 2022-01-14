@@ -1,2 +1,5 @@
-uploads/*
-!*/.gitkeep
+persistance/db/*
+persistance/uploads/*
+
+!.gitkeep
+.env
