@@ -19,7 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "argon2": "0.28.3",
-    "bluebird": "3.7.2",
+    "better-sqlite3": "7.4.6",
     "fastify": "^3.0.0",
     "fastify-autoload": "^3.3.1",
     "fastify-cli": "^2.10.0",
@@ -28,7 +28,7 @@
     "fastify-sensible": "^3.1.0",
     "fastify-static": "4.5.0",
     "fastify-websocket": "4.0.0",
-    "sqlite3": "5.0.2",
+    "generic-pool": "3.8.2",
     "uuid": "8.3.2"
   },
   "devDependencies": {
