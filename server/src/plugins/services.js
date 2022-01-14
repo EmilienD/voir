@@ -31,17 +31,16 @@ module.exports = fp(async (fastify, opts, done) => {
     }
     req.services = services(repositories(db))
   })
-  fastify.addHook('onResponse', async (req) => {
-    if (shouldWrapInTransaction(req, opts)) {
-      req.db.prepare('COMMIT').run()
+  fastify.addHook('onResponse', async (req, rep) => {
+    if (rep.statusCode < 500 && shouldWrapInTransaction(req, opts)) {
+      await req.db.prepare('COMMIT').run()
     }
     pool.release(req.db)
   })
   fastify.addHook('onError', async (req) => {
     if (shouldWrapInTransaction(req, opts)) {
-      req.db.prepare('ROLLBACK').run()
+      await req.db.prepare('ROLLBACK').run()
     }
-    pool.release(req.db)
   })
   fastify.addHook('onClose', async () => {
     await pool.drain().then(() => pool.clear())
