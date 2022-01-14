@@ -21,5 +21,11 @@ module.exports = ({ repositories }) => ({
     })
     return savedUser
   },
+  verifyUser: async ({ email, password }) => {
+    const { password_hash: passwordHash, ...user } =
+      await repositories.user.getUserByEmail(email)
+    const isValid = await argon2.verify(passwordHash, password)
+    return isValid ? user : null
+  },
   getAllUsers: () => repositories.user.getAllUsers(),
 })

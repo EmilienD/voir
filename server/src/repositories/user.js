@@ -1,10 +1,10 @@
 const { sql } = require('../utils/sql')
 
 module.exports = (db) => ({
-  createUser: async ({ id, email, hashedPassword, createdAt }) => {
+  createUser: async ({ id, email, passwordHash, createdAt }) => {
     const [query, params] = sql`
     INSERT INTO users (id, email, password_hash, created_at)
-    VALUES (${id}, ${email}, ${hashedPassword}, ${createdAt});
+    VALUES (${id}, ${email}, ${passwordHash}, ${createdAt});
     `
     await db.prepare(query).run(params)
     return { id, email, createdAt }
