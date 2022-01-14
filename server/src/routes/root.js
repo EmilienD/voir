@@ -55,4 +55,5 @@ module.exports = async function (fastify) {
   })
 }
 
-const getFilePath = (id) => path.resolve(__dirname, `../../uploads/${id}.webm`)
+const getFilePath = (id) =>
+  path.resolve(__dirname, `../../../uploads/${id}.webm`)
