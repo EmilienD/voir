@@ -6,16 +6,6 @@ const services = require('../services')
 const repositories = require('../repositories')
 const BetterSqlite3 = require('better-sqlite3')
 const genericPool = require('generic-pool')
-const factory = {
-  create: () => {
-    const db = new BetterSqlite3(path.resolve(__dirname, '../../../db/voir.db'))
-    db.pragma('journal_mode = WAL')
-    return db
-  },
-  destroy: (db) => db.close(),
-}
-const opts = { max: 10, min: 2 }
-const pool = genericPool.createPool(factory, opts)
 
 const shouldWrapInTransaction = (req, opts) => {
   const defaultWrapInTransaction = req.method !== 'GET'
@@ -23,8 +13,16 @@ const shouldWrapInTransaction = (req, opts) => {
 }
 
 module.exports = fp(async (fastify, opts, done) => {
-  fastify.decorateRequest('services', {})
-  fastify.decorateRequest('db', {})
+  const factory = {
+    create: () => {
+      const db = new BetterSqlite3(path.resolve(process.env.DB_PATH))
+      db.pragma('journal_mode = WAL')
+      return db
+    },
+    destroy: (db) => db.close(),
+  }
+  const poolOpts = { max: 10, min: 2 }
+  const pool = genericPool.createPool(factory, poolOpts)
   fastify.addHook('preHandler', async (req) => {
     const db = await pool.acquire()
     req.db = db

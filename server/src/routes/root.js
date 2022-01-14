@@ -3,7 +3,8 @@ const promisesFs = require('fs/promises')
 const path = require('path')
 const { v4: uuidV4 } = require('uuid')
 
-module.exports = async function (fastify) {
+module.exports = async (fastify, opts) => {
+  const getFilePath = (id) => path.resolve(opts.uploadFolder, `${id}.webm`)
   fastify.get('/upload-stream', { websocket: true }, (connection) => {
     let hasContent = false
     const filePath = getFilePath(uuidV4())
@@ -54,6 +55,3 @@ module.exports = async function (fastify) {
       .send(readStream)
   })
 }
-
-const getFilePath = (id) =>
-  path.resolve(__dirname, `../../../uploads/${id}.webm`)
