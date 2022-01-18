@@ -30,4 +30,12 @@ module.exports = async function (fastify) {
     rep.unsetAuthenticationToken()
     rep.code(204)
   })
+  fastify.get('/self', async (req, rep) => {
+    if (req.authenticatedUser) {
+      return { user: req.authenticatedUser }
+    } else {
+      rep.code(403)
+      return null
+    }
+  })
 }

@@ -14,14 +14,15 @@ module.exports = fp(
         sameSite: 'strict',
         expires,
         httpOnly: true,
-        secure: opts.cookieInstallationSecure,
+        secure: true,
         path: '/',
       })
       rep.setCookie('VOiR-installation', installation.id, {
-        path: '/',
+        sameSite: 'strict',
         expires,
         httpOnly: true,
-        secure: opts.cookieInstallationSecure,
+        secure: true,
+        path: '/',
       })
     }
     fastify.addHook('preHandler', async (req) => {

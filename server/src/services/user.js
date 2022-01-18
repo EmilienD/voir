@@ -22,8 +22,14 @@ module.exports = ({ repositories }) => ({
     await repositories.user.createUser(newUser)
     const installation = { id: uuidV4(), token: uuidV4(), userId: newUser.id }
     await repositories.installation.create(installation)
-
-    return { user: newUser, installation }
+    return {
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        createdAt: newUser.createdAt,
+      },
+      installation,
+    }
   },
   getAuthenticationToken: async ({ email, password, installationId }) => {
     const maybeUser = await repositories.user.getUserByEmail(email)
@@ -33,20 +39,23 @@ module.exports = ({ repositories }) => ({
     const { passwordHash, ...user } = maybeUser
     const isValid = await argon2.verify(passwordHash, password)
     if (isValid) {
-      let installation
-      if (installationId) {
-        const updatedInstallation = {
+      const existingInstallation = await repositories.installation.get({
+        userId: user.id,
+        id: installationId,
+      })
+      if (existingInstallation) {
+        const installation = {
           id: installationId,
           token: uuidV4(),
+          userId: user.id,
         }
-        installation = await repositories.installation.update(
-          updatedInstallation
-        )
+        await repositories.installation.update(installation)
+        return { user, installation }
       } else {
-        installation = { id: uuidV4(), token: uuidV4(), userId: user.id }
+        const installation = { id: uuidV4(), token: uuidV4(), userId: user.id }
         await repositories.installation.create(installation)
+        return { user, installation }
       }
-      return { user, installation }
     } else {
       return null
     }

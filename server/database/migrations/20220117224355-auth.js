@@ -15,20 +15,23 @@ exports.setup = function (options, seedLink) {
 }
 
 exports.up = function (db) {
+  // Both user_id and id are primary keys because the same browser
+  // could have two different users on it
   return db.createTable('installations', {
     id: {
       type: 'string',
       primaryKey: true,
     },
-    token: { type: 'string' },
     user_id: {
       type: 'string',
+      primaryKey: true,
       foreignKey: {
         name: 'user_installations_fk',
         table: 'users',
         mapping: 'id',
       },
     },
+    token: { type: 'string' },
     created_at: {
       type: 'string',
     },
