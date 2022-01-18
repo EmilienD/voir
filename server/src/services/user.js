@@ -12,20 +12,49 @@ module.exports = ({ repositories }) => ({
       timeCost: 2,
     })
 
-    const savedUser = await repositories.user.createUser({
+    const newUser = {
       id: id || uuidV4(),
       email,
       password,
       createdAt: new Date().toJSON(),
       passwordHash,
-    })
-    return savedUser
+    }
+    await repositories.user.createUser(newUser)
+    const installation = { id: uuidV4(), token: uuidV4(), userId: newUser.id }
+    await repositories.installation.create(installation)
+
+    return { user: newUser, installation }
   },
-  verifyUser: async ({ email, password }) => {
-    const { password_hash: passwordHash, ...user } =
-      await repositories.user.getUserByEmail(email)
+  getAuthenticationToken: async ({ email, password, installationId }) => {
+    const maybeUser = await repositories.user.getUserByEmail(email)
+    if (!maybeUser) {
+      return null
+    }
+    const { passwordHash, ...user } = maybeUser
     const isValid = await argon2.verify(passwordHash, password)
-    return isValid ? user : null
+    if (isValid) {
+      let installation
+      if (installationId) {
+        const updatedInstallation = {
+          id: installationId,
+          token: uuidV4(),
+        }
+        installation = await repositories.installation.update(
+          updatedInstallation
+        )
+      } else {
+        installation = { id: uuidV4(), token: uuidV4(), userId: user.id }
+        await repositories.installation.create(installation)
+      }
+      return { user, installation }
+    } else {
+      return null
+    }
   },
-  getAllUsers: () => repositories.user.getAllUsers(),
+  deleteAuthenticationToken: async (installation) => {
+    return repositories.installation.update({ id: installation.id })
+  },
+  getUserByToken: async (token) => {
+    return repositories.user.getUserByToken(token)
+  },
 })

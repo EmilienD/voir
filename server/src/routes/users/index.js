@@ -1,20 +1,33 @@
 'use strict'
 
-module.exports = async function (fastify, opts) {
-  fastify.post('/', async function (req) {
-    return req.services.user.createUser(req.body)
+module.exports = async function (fastify) {
+  fastify.post('/', async function (req, rep) {
+    const { user, installation } = await req.services.user.createUser(req.body)
+    rep.setAuthenticationToken(installation)
+    return { user }
   })
-  fastify.get('/', async (req) => {
-    return req.services.user.getAllUsers()
-  })
-  fastify.post('/login', async (req) => {
+  fastify.post('/token', { noPreloadUser: true }, async (req, rep) => {
     const { email, password } = req.body
-    const user = await req.services.user.verifyUser({ email, password })
-    if (user) {
-      return user
+    const maybe = await req.services.user.getAuthenticationToken({
+      email,
+      password,
+      installationId: req.cookies['VOiR-installation'],
+    })
+
+    if (maybe) {
+      const { user, installation } = maybe
+      rep.setAuthenticationToken(installation)
+      return { user }
     } else {
-      req.code(403)
+      rep.code(403)
       return null
     }
+  })
+  fastify.delete('/token', async (req, rep) => {
+    await req.services.user.deleteAuthenticationToken({
+      id: req.cookies['VOiR-installation'],
+    })
+    rep.unsetAuthenticationToken()
+    rep.code(204)
   })
 }
