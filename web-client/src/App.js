@@ -6,7 +6,9 @@ import {
   RecordButton,
   StopButton,
   Button,
-} from './components/particles/Buttons'
+} from './components/atoms/Buttons'
+import { Menu } from './components/molecules/Menu'
+import { useUserStore } from './model/state'
 
 const db = new Dexie('Voir')
 db.version(1).stores({
@@ -114,6 +116,17 @@ const useVoir = () => {
 }
 
 function App() {
+  const setUser = useUserStore((state) => state.setUser)
+  useEffect(() => {
+    fetch('http://localhost:3000/api/v1/users/self', {
+      method: 'GET',
+    })
+      .then((res) => (res.status === 200 ? res.json() : null))
+      .then((res) => setUser(res?.user))
+      .catch((err) => {
+        console.error(err)
+      })
+  }, [setUser])
   const {
     mediaDeviceError,
     socketError,
@@ -131,15 +144,7 @@ function App() {
   }, [mediaStream])
   return (
     <div className="flex flex-col">
-      {mediaStream && (
-        <p className="text-white">
-          {JSON.stringify(
-            mediaStream.getVideoTracks()[0].getSettings(),
-            null,
-            2
-          )}
-        </p>
-      )}
+      {mediaStream && <p className="text-white"></p>}
       {mediaDeviceError && (
         <p>Media device error: {mediaDeviceError.message}</p>
       )}
@@ -214,6 +219,7 @@ function App() {
         muted
         autoPlay
       ></video>
+      <Menu />
     </div>
   )
 }
