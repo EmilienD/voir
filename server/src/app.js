@@ -9,6 +9,9 @@ module.exports = async function (fastify, opts) {
     dbPath: process.env.DB_PATH,
     webClientFolder: process.env.WEB_CLIENT_FOLDER,
     uploadFolder: process.env.UPLOAD_FOLDER,
+    cookieSecure: process.env.COOKIE_SECURE
+      ? JSON.parse(process.env.COOKIE_SECURE)
+      : true,
   }
   // Do not touch the following lines
 
