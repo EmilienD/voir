@@ -12,7 +12,7 @@ const shouldWrapInTransaction = (req, opts) => {
   return opts.wrapInTransaction ?? defaultWrapInTransaction
 }
 
-module.exports = fp(async (fastify, opts, done) => {
+const plugin = async (fastify, opts, done) => {
   const factory = {
     create: () => {
       const db = new BetterSqlite3(path.resolve(process.env.DB_PATH))
@@ -46,4 +46,8 @@ module.exports = fp(async (fastify, opts, done) => {
     await pool.drain().then(() => pool.clear())
   })
   done()
+}
+
+module.exports = fp(plugin, {
+  name: 'services',
 })
